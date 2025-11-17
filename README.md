@@ -162,7 +162,6 @@ Safe to re-run after failures or interruptions.
 
 After running the pipeline, you can quickly assess alignment quality using:
 
-```bash
 ```
 samtools flagstat SAMPLE_untrimmed.bam
 samtools.flagstat SAMPLE_trimmed.bam
