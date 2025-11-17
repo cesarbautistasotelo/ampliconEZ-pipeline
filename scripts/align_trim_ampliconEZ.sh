@@ -37,13 +37,19 @@ declare -A FWD_PRIMERS
 declare -A REV_PRIMERS
 
 if [[ "$TRIM_MODE" != "none" ]]; then
-    while IFS=$'\t' read -r gene fwd rev; do
-        [[ "$gene" =~ ^#|gene ]] && continue
+    while read -r gene fwd rev _rest; do
+        # Skip empty lines
         [[ -z "$gene" ]] && continue
+        # Skip commented lines or header row starting with "gene"
+        [[ "$gene" == \#* ]] && continue
+        [[ "$gene" == "gene" ]] && continue
+
         GENES+=("$gene")
-        FWD_PRIMERS[$gene]="$fwd"
-        REV_PRIMERS[$gene]="$rev"
+        FWD_PRIMERS["$gene"]="$fwd"
+        REV_PRIMERS["$gene"]="$rev"
     done < "$PRIMER_TSV"
+
+    echo "[INFO] Loaded ${#GENES[@]} primer entries from $PRIMER_TSV"
 fi
 
 get_gene() {

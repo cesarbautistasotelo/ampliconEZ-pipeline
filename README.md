@@ -104,7 +104,13 @@ You can either:
 ## 🖥 Manual Run (no LSF)
 
 ```bash
-bash scripts/align_trim_ampliconEZ.sh     /path/to/hg38.fa     /path/to/fastqs     /path/to/output     config/primers_example.tsv     both
+bsub -q short -n 4 -W 2:00 -R "rusage[mem=8000]" \
+>   scripts/align_trim_ampliconEZ.sh \
+>   /home/cesar.bautistasotelo-umw/Genomes/hg38.fa \
+>   /home/cesar.bautistasotelo-umw/projects/MM_analysis/1_ampliconEZ/1_mosaic_LEMD3_WDR37/30-1201770023/00_fastq \
+>   /home/cesar.bautistasotelo-umw/projects/MM_analysis/1_ampliconEZ/1_mosaic_LEMD3_WDR37/30-1201770023/03_repo-test \
+>   config/primers_example.tsv \
+>   both
 ```
 
 ### Arguments:
@@ -149,6 +155,46 @@ The pipeline skips any existing BAM + BAI pairs:
 ```
 
 Safe to re-run after failures or interruptions.
+
+---
+
+## 📊 Example QC: `samtools flagstat` (Untrimmed vs Trimmed)
+
+After running the pipeline, you can quickly assess alignment quality using:
+
+```bash
+```
+samtools flagstat SAMPLE_untrimmed.bam
+samtools.flagstat SAMPLE_trimmed.bam
+```
+
+Untrimmed BAM example:
+```
+692,671 + 0 in total (QC-passed reads + QC-failed reads)
+683,504 + 0 primary
+665,659 + 0 mapped (96.10%)
+581,132 + 0 properly paired (85.02%)
+2,768 + 0 singletons (0.40%)
+9,167 + 0 supplementary
+```
+
+Trimmed BAM example:
+```
+692,561 + 0 in total (QC-passed reads + QC-failed reads)
+683,504 + 0 primary
+669,447 + 0 mapped (96.66%)
+647,098 + 0 properly paired (94.67%)
+2,524 + 0 singletons (0.37%)
+9,057 + 0 supplementary
+```
+
+Interpretation
+	•	Read count stays constant → trimming preserves all read pairs.
+	•	Mapped % increases after removing primer sequence.
+	•	Properly paired % improves substantially (85% → 95%), which is expected when primer sequence is clipped off and insert sizes become more consistent.
+	•	Slight reduction in singletons and supplementary alignments indicates cleaner alignments.
+
+This improvement is typical for PCR amplicon sequencing, where primer sequences remain at the ends of reads and can interfere with alignment unless trimmed.
 
 ---
 
